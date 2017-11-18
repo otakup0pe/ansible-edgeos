@@ -1,0 +1,23 @@
+---
+- name: "install pimd"
+  apt:
+    pkg: pimd
+    state: installed
+- name: "check for pimd config"
+  stat:
+    path: "/etc/pimd.conf"
+  register: pimd_exists
+- name: "generate pimd config"
+  template:
+    src: pimd.conf
+    dest: "/etc/pimd.conf"
+    owner: root
+    group: root
+    mode: 0660
+  register: pimd_config
+- name: "start pimd the first time"
+  command: service pimd start
+  when: not pimd_exists.stat.exists
+- name: "restart pimd"
+  command: service pimd restart
+  when: pimd_exists.stat.exists and pimd_config.changed

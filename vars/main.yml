@@ -1,0 +1,5 @@
+---
+edgeos_bins:
+  - vyos-dns
+  - vyos-misc
+  - vyos-dhcp

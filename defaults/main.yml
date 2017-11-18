@@ -1,0 +1,9 @@
+---
+edgeos_bin_dir: "/usr/local/sbin"
+edgeos_ca: ~
+edgeos_cert: ~
+edgeos_key: ~
+edgeos_interface_disable: []
+edgeos_interface: ~
+edgeos_ssl: true
+edgeos_pim: true

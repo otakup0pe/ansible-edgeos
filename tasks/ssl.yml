@@ -1,0 +1,29 @@
+---
+- name: "create a directory for tls bits"
+  file:
+    path: "/config/lighttpd"
+    state: directory
+    owner: root
+    group: www-data
+    mode: 0770
+- name: "generate server pem"
+  copy:
+    dest: "/config/lighttpd/server.pem"
+    owner: root
+    group: www-data
+    mode: 0600
+    content: "{{lookup('file', edgeos_key)}}
+
+{{lookup('pipe', 'openssl x509 -in ' + edgeos_cert)}}"
+  register: copy_cert
+- name: "copy ca pem"
+  copy:
+    dest: "/config/lighttpd/ca.pem"
+    owner: root
+    group: www-data
+    mode: 0600
+    src: "{{edgeos_ca}}"
+  register: copy_ca
+- name: "restart lighttpd"
+  command: "{{edgeos_bin_dir}}/vyos-misc web restart"
+  when: copy_cert.changed or copy_ca.changed

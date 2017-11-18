@@ -1,0 +1,10 @@
+---
+galaxy_info:
+  author: Jonathan Freedman
+  license: MIT
+  galaxy_tags:
+    - network
+    - vyos
+  min_ansible_version: 2.4
+  platforms: []
+dependencies: []

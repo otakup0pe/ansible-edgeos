@@ -1,0 +1,16 @@
+---
+- apt:
+    update_cache: true
+    cache_valid_time: 1800
+- name: "copy helper scripts"
+  copy:
+    src: "{{item}}.sh"
+    dest: "{{edgeos_bin_dir}}/{{item}}"
+    mode: "0700"
+    owner: "root"
+    group: "root"
+  with_items: "{{edgeos_bins}}"
+- import_tasks: "ssl.yml"
+  when: edgeos_ssl
+- import_tasks: "pim.yml"
+  when: edgeos_pim
