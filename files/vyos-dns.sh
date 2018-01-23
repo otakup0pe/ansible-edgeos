@@ -1,5 +1,12 @@
 #!/bin/vbash
-set -eu # you can never be trusted
+set -e # you can never be trusted
+
+# script-template is alias based...
+shopt -s expand_aliases
+# These are magic scripts which come from VyOS
+# shellcheck disable=SC1091
+. /opt/vyatta/etc/functions/script-template
+configure
 
 usage() {
     echo "${0} update <dns> <ip>"
@@ -10,6 +17,43 @@ usage() {
     echo "${0} list"
     exit 1
 }
+
+get_dns_entry() {
+    [ "$#" == 1 ]
+    local HOST="$1"
+    IP_VAL=""
+    EXISTING="$(show system static-host-mapping host-name "$DNS" | head -n 1 | awk '{print $2}')"
+    if [ ! -z "$EXISTING" ] && [ "$EXISTING" != "$IP_VAL" ] && \
+           ( [ "$EXISTING" != "specified" ] && [ "$EXISTING" != "under" ] ) ; then
+        IP_VAL="$EXISTING"
+    fi
+}
+
+delete_dns_entry() {
+    [ "$#" == 1 ]
+    local HOST="$1"
+    [ ! -z "$HOST" ]
+    delete system static-host-mapping host-name "$HOST"
+}
+
+set_dns_entry() {
+    [ "$#" == 2 ]
+    local HOST="$1"
+    local IP="$2"
+    [ ! -z "$HOST" ] && [ ! -z "$IP" ]
+    # VyOS set
+    # shellcheck disable=SC2121
+    set system static-host-mapping host-name "$HOST" inet "$IP"
+}
+
+wrap_up() {
+    commit
+    save
+}
+
+if [ "$#" -lt 1 ] ; then
+    usage
+fi
 
 ACTION="$1"
 if [ -z "$ACTION" ] ; then
@@ -30,41 +74,29 @@ if [ "$ACTION" == "forward-update" ] ; then
     SERVER="$2"
 fi
 
-# These are magic scripts which come from VyOS
-# shellcheck disable=SC1091
-. /opt/vyatta/etc/functions/script-template
-configure
-
 if [ "$ACTION" = "update" ] ; then
-    EXISTING="$(show system static-host-mapping host-name "$DNS" | head -n 1 | awk '{print $2}')"
-    if [ ! -z "$EXISTING" ] && [ "$EXISTING" != "specified" ] && [ "$EXISTING" != "$IP" ] ; then
-        echo "Updating ${DNS} ${EXISTING} to ${IP}"
-        delete system static-host-mapping host-name "$DNS"
-        # VyOS set
-        # shellcheck disable=SC2121
-        set system static-host-mapping host-name "$DNS" inet "$IP"
-        commit
-        save
-    elif [ "$EXISTING" == "specified" ] ; then
+    get_dns_entry "$DNS"
+    if [ ! -z "$IP_VAL" ] ; then
+        echo "Updating ${DNS} (${IP_VAL}) to ${IP}"
+        delete_dns_entry "$DNS"
+        set_dns_entry "$DNS" "$IP"
+        wrap_up
+    elif [ "$IP_VAL" == "$IP" ] ; then
+        echo "${DNS} is ${IP}"        
+    elif [ -z "$IP_VAL" ] ; then
         echo "Updating ${DNS} to ${IP}"
-        # VyOS set
-        # shellcheck disable=SC2121
-        set system static-host-mapping host-name "$DNS" inet "$IP"
-        commit
-        save
-    elif [ "$EXISTING" == "$IP" ] ; then
-        echo "${DNS} is ${IP}"
+        set_dns_entry "$DNS" "$IP"
+        wrap_up
     else
         echo "Unknown state tho"
         exit 1
     fi
 elif [ "$ACTION" = "delete" ] ; then
-    EXISTING="$(show system static-host-mapping host-name "$DNS" | head -n 1 | awk '{print $2}')"
-    if [ ! -z "$EXISTING" ] ; then
-        echo "Deleting ${DNS} (${EXISTING})"
-        delete system static-host-mapping host-name "$DNS"
-        commit
-        save
+    get_dns_entry "$DNS"
+    if [ ! -z "$IP_VAL" ] ; then
+        echo "Deleting ${DNS} (${IP_VAL})"
+        delete_dns_entry "$DNS"
+        wrap_up
     else
         echo "${DNS} already deleted"
     fi
