@@ -6,5 +6,8 @@ galaxy_info:
     - network
     - vyos
   min_ansible_version: 2.4
-  platforms: []
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
 dependencies: []
