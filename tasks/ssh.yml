@@ -1,0 +1,19 @@
+---
+- name: "ensure ssh directory is present"
+  file:
+    path: "/home/{{edgeos_ssh_user}}/.ssh"
+    owner: "{{edgeos_ssh_user}}"
+    group: "users"
+    mode: "0700"
+- name: "write ssh authorized keys"
+  template:
+    src: "authorized_keys.j2"
+    dest: "/home/{{edgeos_ssh_user}}/.ssh/authorized_keys"
+    owner: "{{edgeos_ssh_user}}"
+    group: "users"
+    mode: "0600"
+  register: edgeos_authorized_keys
+# need to figure out why loadkey ain't working in vbash :(
+#- name: "load ssh keys"
+#  command: "{{edgeos_bin_dir}}/vyos-misc loadkey {{edgeos_ssh_user}}"
+#  when: edgeos_authorized_keys.changed

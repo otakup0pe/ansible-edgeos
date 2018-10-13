@@ -7,3 +7,5 @@ edgeos_interface_disable: []
 edgeos_interface: ~
 edgeos_ssl: true
 edgeos_pim: true
+edgeos_ssh_user: ~
+edgeos_ssh_keys: []

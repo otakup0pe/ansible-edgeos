@@ -1,0 +1,5 @@
+# {{ansible_managed}}
+# this file is used only as a shim for loadkeys
+{% for key in edgeos_ssh_keys %}
+{{key}}
+{% endfor -%}
