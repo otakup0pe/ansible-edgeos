@@ -14,6 +14,6 @@
     mode: "0600"
   register: edgeos_authorized_keys
 # need to figure out why loadkey ain't working in vbash :(
-#- name: "load ssh keys"
-#  command: "{{edgeos_bin_dir}}/vyos-misc loadkey {{edgeos_ssh_user}}"
-#  when: edgeos_authorized_keys.changed
+# - name: "load ssh keys"
+#   command: "{{edgeos_bin_dir}}/vyos-misc loadkey {{edgeos_ssh_user}}"
+#   when: edgeos_authorized_keys.changed

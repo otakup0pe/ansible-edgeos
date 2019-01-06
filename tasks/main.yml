@@ -11,7 +11,7 @@
     group: "root"
   with_items: "{{edgeos_bins}}"
 - import_tasks: "ssh.yml"
-  when: "edgeos_ssh_user != '~'"
+  when: edgeos_ssh_user
 - import_tasks: "ssl.yml"
   when: edgeos_ssl
 - import_tasks: "pim.yml"

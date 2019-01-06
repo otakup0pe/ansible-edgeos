@@ -27,7 +27,7 @@ if [ "$ACTION" == "web" ] ; then
     shift
     if [ "$SUB_ACTION" == "restart" ] ; then
         PID=$(cat /var/run/lighttpd.pid)
-        if [ ! -z "$PID" ] ; then
+        if [ -n "$PID" ] ; then
             kill -SIGINT "$PID"
         fi
         /usr/sbin/lighttpd -f /etc/lighttpd/lighttpd.conf

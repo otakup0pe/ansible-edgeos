@@ -23,8 +23,8 @@ get_dns_entry() {
     local HOST="$1"
     IP_VAL=""
     EXISTING="$(show system static-host-mapping host-name "$DNS" | head -n 1 | awk '{print $2}')"
-    if [ ! -z "$EXISTING" ] && [ "$EXISTING" != "$IP_VAL" ] && \
-           ( [ "$EXISTING" != "specified" ] && [ "$EXISTING" != "under" ] ) ; then
+    if [ -n "$EXISTING" ] && [ "$EXISTING" != "$IP_VAL" ] && \
+           { [ "$EXISTING" != "specified" ] && [ "$EXISTING" != "under" ]; } ; then
         IP_VAL="$EXISTING"
     fi
 }
@@ -32,7 +32,7 @@ get_dns_entry() {
 delete_dns_entry() {
     [ "$#" == 1 ]
     local HOST="$1"
-    [ ! -z "$HOST" ]
+    [ -n "$HOST" ]
     delete system static-host-mapping host-name "$HOST"
 }
 
@@ -40,7 +40,7 @@ set_dns_entry() {
     [ "$#" == 2 ]
     local HOST="$1"
     local IP="$2"
-    [ ! -z "$HOST" ] && [ ! -z "$IP" ]
+    [ -n "$HOST" ] && [ -n "$IP" ]
     # VyOS set
     # shellcheck disable=SC2121
     set system static-host-mapping host-name "$HOST" inet "$IP"
@@ -76,13 +76,13 @@ fi
 
 if [ "$ACTION" = "update" ] ; then
     get_dns_entry "$DNS"
-    if [ ! -z "$IP_VAL" ] ; then
+    if [ "$IP_VAL" == "$IP" ] ; then
+        echo "${DNS} is ${IP}"
+    elif [ -n "$IP_VAL" ] ; then
         echo "Updating ${DNS} (${IP_VAL}) to ${IP}"
         delete_dns_entry "$DNS"
         set_dns_entry "$DNS" "$IP"
         wrap_up
-    elif [ "$IP_VAL" == "$IP" ] ; then
-        echo "${DNS} is ${IP}"        
     elif [ -z "$IP_VAL" ] ; then
         echo "Updating ${DNS} to ${IP}"
         set_dns_entry "$DNS" "$IP"
@@ -93,7 +93,7 @@ if [ "$ACTION" = "update" ] ; then
     fi
 elif [ "$ACTION" = "delete" ] ; then
     get_dns_entry "$DNS"
-    if [ ! -z "$IP_VAL" ] ; then
+    if [ -n "$IP_VAL" ] ; then
         echo "Deleting ${DNS} (${IP_VAL})"
         delete_dns_entry "$DNS"
         wrap_up
@@ -110,7 +110,7 @@ elif [ "$ACTION" == "forward-list" ] ; then
         cut -f 2 -d '=' | sed -e 's!/!!' -e 's!/! - !'
 elif [ "$ACTION" == "forward-update" ] ; then
     EXISTING="$(show service dns forwarding | grep "options server" | grep "$DOMAIN" | cut -f 3 -d '/')"
-    if [ ! -z "$EXISTING" ] && [ "$EXISTING" != "$SERVER" ] ; then
+    if [ -n "$EXISTING" ] && [ "$EXISTING" != "$SERVER" ] ; then
         echo "Updating forward ${DOMAIN} ${EXISTING} to ${SERVER}"
         delete service dns forwarding options "server=/${DOMAIN}/${EXISTING}"
         set service dns forwarding options "server=/${DOMAIN}/${SERVER}"
@@ -129,7 +129,7 @@ elif [ "$ACTION" == "forward-update" ] ; then
     fi
 elif [ "$ACTION" == "forward-delete" ] ; then
     EXISTING="$(show service dns forwarding | grep "options server" | grep "$DOMAIN" | cut -f 3 -d '/')"
-    if [ ! -z "$EXISTING" ] ; then
+    if [ -n "$EXISTING" ] ; then
         echo "Deleting forward ${DOMAIN} (${EXISTING})"
         delete service dns forwarding options "server=/${DOMAIN}/${EXISTING}"
         commit

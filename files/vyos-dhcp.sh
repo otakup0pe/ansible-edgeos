@@ -50,8 +50,8 @@ elif [ "$ACTION" = "update" ] ; then
         set service dhcp-server shared-network-name "$NETWORK" subnet "$SUBNET" static-mapping "$HOST" mac-address "$MAC"
         commit
         save
-    elif ([ "$EXISTING_IP" != "under" ] && [ "$EXISTING_IP" != "$IP" ]) || \
-             ([ "$EXISTING_MAC" != "under" ] && [ "$EXISTING_MAC" != "$MAC" ]) ; then
+    elif { [ "$EXISTING_IP" != "under" ] && [ "$EXISTING_IP" != "$IP" ]; } || \
+             { [ "$EXISTING_MAC" != "under" ] && [ "$EXISTING_MAC" != "$MAC" ]; } ; then
         echo "Updating ${HOST} - ${MAC} ${IP} (from ${EXISTING_MAC} ${EXISTING_IP})"
         delete service dhcp-server shared-network-name "$NETWORK" subnet "$SUBNET" static-mapping "$HOST"
         # VyOS set
@@ -61,8 +61,8 @@ elif [ "$ACTION" = "update" ] ; then
         set service dhcp-server shared-network-name "$NETWORK" subnet "$SUBNET" static-mapping "$HOST" mac-address "$MAC"
         commit
         save
-    elif ([ "$EXISTING_IP" != "under" ] && [ "$EXISTING_IP" = "$IP" ]) || \
-             ([ "$EXISTING_MAC" != "under" ] && [ "$EXISTING_MAC" = "$MAC" ]) ; then
+    elif { [ "$EXISTING_IP" != "under" ] && [ "$EXISTING_IP" = "$IP" ]; } || \
+             { [ "$EXISTING_MAC" != "under" ] && [ "$EXISTING_MAC" = "$MAC" ]; } ; then
         echo "${HOST} - ${MAC} ${IP}"
     else
         echo "Unknown state tho"
