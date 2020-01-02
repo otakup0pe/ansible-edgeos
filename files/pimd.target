@@ -1,0 +1,14 @@
+[Unit]
+Description=pimd PIM-SM Daemon
+After=syslog.target network.target
+ConditionPathExists=/etc/pimd.conf
+Documentation=man:pimd
+
+[Service]
+Type=forking
+EnvironmentFile=-/etc/default/pimd
+ExecStart=/usr/local/sbin/pimd -c /etc/pimd.conf
+ExecStop=/usr/local/sbin/pimd -q
+
+[Install]
+WantedBy=multi-user.target

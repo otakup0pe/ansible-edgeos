@@ -1,4 +1,18 @@
 ---
+- name: "ensure systemd path exists"
+  file:
+    path: "/usr/lib/systemd/system"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0760"
+- name: "isntall systemd file"
+  copy:
+    src: "pimd.target"
+    dest: "/usr/lib/systemd/system/pimd.target"
+    owner: "root"
+    group: "root"
+    mode: "0640"
 - name: "install pimd"
   apt:
     pkg: pimd
